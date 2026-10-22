@@ -5,6 +5,7 @@ from src.data_loader import (
     load_rq1_table,
     load_metrics_summary,
     load_forecasts,
+    load_latest_forecasts,
 )
 
 st.set_page_config(
@@ -69,6 +70,7 @@ tvp_df = load_tvp_features()
 rq1_df = load_rq1_table()
 metrics_df = load_metrics_summary()
 forecasts_df = load_forecasts()
+latest_fc_df = load_latest_forecasts()
 
 # Calculate summary figures
 avg_tsi = float(tvp_df["tvp_tsi"].mean())
@@ -138,11 +140,12 @@ nav1, nav2 = st.columns(2)
 with nav1:
     st.markdown("""
     - **[1. Spillover Analysis](pages/1_Spillover.py)**: Dynamic TVP-VAR Total Spillover Index (TSI) over time, average net spillover transmitters/receivers, and directional transmission to BTC-IDR.
-    - **[2. Out-of-Sample Forecasts](pages/2_Forecast.py)**: Interactive multi-model time series predictions vs. realized volatility across $h=1$ and $h=10$ horizons with dynamic MSE/MAE recalculation for selected date ranges.
+    - **[2. Out-of-Sample Forecasts](pages/2_Forecast.py)**: Interactive multi-model time series predictions vs. realized volatility across $h=1$ and $h=10$ horizons with dynamic MSE/MAE recalculation.
+    - **[3. Model Comparison](pages/3_Model_Comparison.py)**: Comparative MSE/MAE rankings across all architectures, Diebold-Mariano test matrices, and Bonferroni significance checks.
     """)
 
 with nav2:
     st.markdown("""
-    - **[3. Model Comparison](pages/3_Model_Comparison.py)**: Comparative MSE/MAE rankings across all deep learning architectures and baselines, accompanied by Diebold-Mariano test matrices and Bonferroni significance checks.
     - **[4. Empirical Limitations](pages/4_Limitations.py)**: Objective assessment of baseline persistence superiority, low prediction correlations, proxy sensitivity, and institutional data considerations.
+    - **[5. Latest HAR Forecast](pages/5_Latest_Forecast.py)**: ⚡ **Live Tracking Page** showing daily automated HAR volatility forecasts ($h=1$ and $h=10$) updated from Indodax candles, tracking real-time out-of-sample accuracy.
     """)

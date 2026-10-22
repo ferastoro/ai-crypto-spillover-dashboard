@@ -43,7 +43,7 @@ for tab, h_val in [(tab_h1, 1), (tab_h10, 10)]:
         
         with metric_col1:
             fig_bar = create_model_comparison_bar(metrics_df, horizon=h_val, metric=chosen_metric)
-            st.plotly_chart(fig_bar, use_container_width=True)
+            st.plotly_chart(fig_bar, width="stretch")
 
         # Full Metrics Table
         st.subheader(f"2. Comprehensive Metrics Summary (h = {h_val})")
@@ -72,7 +72,7 @@ for tab, h_val in [(tab_h1, 1), (tab_h10, 10)]:
                 "R²_OOS (vs Roll_20)": "{:+.4f}",
                 "Correlation (r)": "{:.4f}"
             }).highlight_min(subset=["MSE (×10⁻⁶)", "MAE (×10⁻⁴)"], color="#1E3A8A"),
-            use_container_width=True,
+            width="stretch",
             hide_index=True
         )
 
@@ -121,7 +121,7 @@ for tab, h_val in [(tab_h1, 1), (tab_h10, 10)]:
                 "p-value (Bonferroni)": "{:.4f}",
                 "Mean Loss Diff (md_MSE)": "{:+.3e}"
             }).apply(highlight_dm, axis=1),
-            use_container_width=True,
+            width="stretch",
             hide_index=True
         )
 

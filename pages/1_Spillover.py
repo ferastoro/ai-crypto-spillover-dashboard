@@ -44,7 +44,7 @@ that is explained by cross-market spillovers rather than own shocks.
 """)
 
 fig_tsi = create_tsi_chart(filtered_tvp)
-st.plotly_chart(fig_tsi, use_container_width=True)
+st.plotly_chart(fig_tsi, width="stretch")
 
 # Regime Indicator Note
 tsi_p80 = float(tvp_df["tvp_tsi"].quantile(0.80))
@@ -63,7 +63,7 @@ with col_left:
     Positive values indicate **net transmitters** of systemic volatility; negative values represent **net receivers**.
     """)
     fig_net = create_net_spillover_bar(rq1_df)
-    st.plotly_chart(fig_net, use_container_width=True)
+    st.plotly_chart(fig_net, width="stretch")
 
 with col_right:
     st.subheader("3. Directional Spillover to BTC-IDR")
@@ -89,7 +89,7 @@ with col_right:
         dir_df = pd.DataFrame(dir_data).sort_values("Spillover to BTC-IDR (%)", ascending=False)
         st.dataframe(
             dir_df.style.format({"Spillover to BTC-IDR (%)": "{:.2f}%"}),
-            use_container_width=True,
+            width="stretch",
             hide_index=True
         )
 

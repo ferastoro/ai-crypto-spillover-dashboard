@@ -99,7 +99,7 @@ if plot_df.empty:
 # Plot Time Series
 st.subheader(f"Forecast Trajectories (Horizon h = {horizon_choice})")
 fig_fc = create_forecast_plot(plot_df, selected_models)
-st.plotly_chart(fig_fc, use_container_width=True)
+st.plotly_chart(fig_fc, width="stretch")
 
 st.divider()
 
@@ -140,7 +140,7 @@ st.dataframe(
         "Correlation (r)": "{:.4f}",
         "Bias Ratio (Pred/True)": "{:.3f}"
     }).highlight_min(subset=["MSE (×10⁻⁶)", "MAE (×10⁻⁴)"], color="#1E3A8A"),
-    use_container_width=True,
+    width="stretch",
     hide_index=True
 )
 

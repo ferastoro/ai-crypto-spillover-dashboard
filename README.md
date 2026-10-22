@@ -7,11 +7,13 @@ An interactive analytical dashboard exploring the transmission of volatility fro
 - **Spillover Dynamics**: Dynamic Total Spillover Index (TSI), directional transmission networks, and net spillover asymmetries between AI technology equities and digital assets.
 - **Out-of-Sample Forecasting**: Empirical evaluation of multi-horizon forecasts ($h=1$ and $h=10$) comparing deep learning models (Temporal Fusion Transformer, NBEATSx) with econometric and statistical baselines (HAR, GARCH, EGARCH, Rolling Mean, Historical Expansion).
 - **Statistical Significance**: Robust model comparison using Diebold-Mariano tests with Newey-West variance estimation, small-sample Harvey-Leybourne-Newbold (HLN) adjustments, and Bonferroni family-wise error rate corrections.
-- **Critical Limitations**: Objective discussion of benchmark persistence dominance, forecast correlation bounds, volatility proxy sensitivity, and market microstructure considerations.
+- **Critical Limitations**: Objective assessment of baseline persistence dominance, forecast correlation bounds, volatility proxy sensitivity, and market microstructure considerations.
+- **⚡ Live HAR Forecast Tracking**: Real-time daily out-of-sample volatility forecasting for BTC-IDR using the econometric Heterogeneous Autoregressive (HAR) model, automated daily via GitHub Actions.
 
-## Data Source
+## Data Source & Live Update Pipeline
 
-The empirical datasets in this repository are derived from academic research analyzing daily market observations from January 2020 through September 2026. The dataset encompasses 1,555 historical observations and 335 rolling out-of-sample forecast cutoff windows. All inputs represent final compiled results, ensuring that the application operates in a strict read-only mode without online model training or parameter refitting.
+- **Academic Thesis Benchmark**: Historical datasets encompass 1,555 observations (January 2020 through September 2026) and 335 rolling evaluation cutoffs. Deep learning models and TVP-VAR vectors remain static as established in the thesis.
+- **Automated Live Pipeline**: A scheduled GitHub Actions workflow runs daily at 01:00 UTC (after the 00:00:00–23:59:59 UTC daily candle closes), pulling completed BTC/IDR daily candles from the Indodax Public API, updating `data/live/btcidr_history.csv`, generating $h=1$ and $h=10$ HAR forecasts, populating realized target variances, and maintaining the out-of-sample scorecard in `data/live/live_scorecard.csv`.
 
 ## Local Installation & Execution
 
@@ -31,15 +33,22 @@ The empirical datasets in this repository are derived from academic research ana
    ```bash
    pip install -r requirements.txt
    ```
-4. Launch the Streamlit application:
+4. (Optional) Run the live forecast update manually:
+   ```bash
+   python live/update_forecast.py
+   ```
+5. Launch the Streamlit application:
    ```bash
    streamlit run app.py
    ```
-5. Open your web browser at `http://localhost:8501`.
+6. Open your web browser at `http://localhost:8501`.
 
 ## Project Structure
 
 ```text
+├── .github/
+│   └── workflows/
+│       └── daily_forecast.yml # Automated daily HAR forecast update workflow
 ├── .streamlit/
 │   └── config.toml          # Streamlit dark theme and server configurations
 ├── data/
@@ -47,12 +56,21 @@ The empirical datasets in this repository are derived from academic research ana
 │   ├── forecasts_v6.csv     # Compiled out-of-sample predictions and ground truth
 │   ├── metrics_dm_summary.csv # Diebold-Mariano test results with Bonferroni correction
 │   ├── metrics_summary.csv  # Model evaluation metrics (MSE, MAE, RMSE, R2_OOS, r)
-│   └── tvp_var_dynamic_features.csv # Dynamic TVP-VAR TSI and net spillover features
+│   ├── tvp_var_dynamic_features.csv # Dynamic TVP-VAR TSI and net spillover features
+│   └── live/
+│       ├── btcidr_history.csv # Continuous BTC/IDR daily history and returns
+│       ├── latest_forecast.csv # Append-only live & backfilled HAR forecasts
+│       └── live_scorecard.csv # Real-time out-of-sample MSE scorecard
+├── live/
+│   ├── __init__.py
+│   ├── har_model.py         # Self-contained HAR econometric model & replication tests
+│   └── update_forecast.py   # Daily Indodax data ingestion and forecast pipeline
 ├── pages/
 │   ├── 1_Spillover.py       # Dynamic TSI time series and directional spillover tables
 │   ├── 2_Forecast.py        # Interactive forecast inspection and range metrics
 │   ├── 3_Model_Comparison.py # Model rankings and Diebold-Mariano hypothesis tests
-│   └── 4_Limitations.py     # Critical review of baseline dominance and data caveats
+│   ├── 4_Limitations.py     # Critical review of baseline dominance and data caveats
+│   └── 5_Latest_Forecast.py # ⚡ Live daily HAR volatility forecast tracking
 ├── src/
 │   ├── __init__.py
 │   ├── charts.py            # Plotly visualization components

@@ -74,9 +74,10 @@ with col2:
     st.markdown(f"""
     - **Empirical Proxy Dependence**: In this dataset using the daily log squared return proxy ($\\log r^2$), BTC-IDR 
       registers as a net transmitter of systemic volatility (`Net Spillover = {btc_net:+.2f}%`).
-    - **Fragility Across Definitions**: Previous volatility literature demonstrates that substituting log variance 
-      proxies with intra-day Garman-Klass, Parkinson, or High-Low range estimators frequently flips the directional 
-      sign of emerging market crypto assets from net transmitter to net receiver.
+    - **Fragility Across Proxy Definitions**: Robustness audits on this dataset test alternative volatility proxies 
+      (|r|, r², and Parkinson volatility). Substituting between absolute returns (|r|), squared returns (r²), and 
+      Parkinson range estimators demonstrates that empirical spillover magnitudes and network centralities are sensitive 
+      to proxy specification.
     """)
 
     st.subheader("5. Single Contiguous Sample & Market Regimes")
@@ -87,13 +88,13 @@ with col2:
       altcoins, or distinct fiat liquidity pairs without out-of-distribution validation.
     """)
 
-    st.subheader("6. Indodax Timestamp & Exchange Microstructure")
+    st.subheader("6. Live Tracking Scope & Exchange Microstructure")
     st.markdown("""
-    - **Non-Synchronous Trading**: US equities trade during NYSE/NASDAQ hours (Eastern Time), whereas Indodax operates 
-      24/7/365 in Western Indonesia Time (WIB, UTC+7).
-    - **Weekend and Holiday Mismatches**: Although calendar alignment, gap days, and weekend return features were 
-      explicitly engineered, asynchronous closing prices and liquidity variations may introduce microstructural noise 
-      that tick-level or intra-day trade feeds have not fully audited.
+    - **Live Forecasting Model Restriction**: Automated daily updates apply exclusively to the parsimonious linear 
+      HAR baseline. Deep learning architectures (TFT, NBEATSx) and TVP-VAR spillover vectors remain strictly static 
+      as established during the thesis sample to prevent online retraining artifacts.
+    - **Indodax Daily Timestamping**: Indodax daily candles operate on 00:00:00 UTC boundaries. While daily close prices 
+      are aligned, intra-day liquidity swings and tick-level order book depth variations have not been independently audited.
     """)
 
 st.divider()

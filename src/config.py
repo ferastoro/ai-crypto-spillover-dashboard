@@ -3,15 +3,21 @@ from pathlib import Path
 # Base project root directory (relative to this file)
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Data directory
+# Data directories
 DATA_DIR = BASE_DIR / "data"
+DATA_LIVE_DIR = DATA_DIR / "live"
 
-# Data file paths
+# Static historical data file paths
 TVP_FEATURES_FILE = DATA_DIR / "tvp_var_dynamic_features.csv"
 RQ1_TABLE_FILE = DATA_DIR / "RQ1_Average_Spillover_Table_vol.csv"
 FORECASTS_FILE = DATA_DIR / "forecasts_v6.csv"
 METRICS_SUMMARY_FILE = DATA_DIR / "metrics_summary.csv"
 METRICS_DM_FILE = DATA_DIR / "metrics_dm_summary.csv"
+
+# Live pipeline data file paths
+BTCIDR_HISTORY_FILE = DATA_LIVE_DIR / "btcidr_history.csv"
+LATEST_FORECAST_FILE = DATA_LIVE_DIR / "latest_forecast.csv"
+LIVE_SCORECARD_FILE = DATA_LIVE_DIR / "live_scorecard.csv"
 
 # Color Palette for Charts & UI
 COLORS = {
@@ -23,6 +29,8 @@ COLORS = {
     "GARCH11": "#EC4899",     # Pink/Rose
     "EGARCH": "#14B8A6",      # Teal
     "y_true": "#F8FAFC",      # Bright White
+    "live_forecast": "#10B981", # Emerald for live forecast
+    "backfill_forecast": "#6366F1", # Indigo for backfill forecast
     "baseline": "#94A3B8",    # Slate
     "dl": "#3B82F6",
     "positive_spill": "#EF4444", # Red (Net transmitter of risk)
