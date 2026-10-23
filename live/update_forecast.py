@@ -216,11 +216,15 @@ def update_history_dataset(df_completed: pd.DataFrame) -> pd.DataFrame:
             merged.loc[i, "ret"] = ret
             merged.loc[i, "r2"] = ret ** 2
 
-    # Save updated btcidr_history.csv
+    # Save updated btcidr_history.csv only if new rows were added
     merged["Date"] = merged["Date"].dt.strftime("%Y-%m-%d")
-    merged.to_csv(HISTORY_FILE, index=False)
-    logger.info("Successfully updated %s (Total rows: %d, latest date: %s).",
-                HISTORY_FILE.name, len(merged), merged["Date"].iloc[-1])
+    if len(merged) > len(df_hist):
+        merged.to_csv(HISTORY_FILE, index=False)
+        logger.info("Successfully updated %s (Total rows: %d, latest date: %s).",
+                    HISTORY_FILE.name, len(merged), merged["Date"].iloc[-1])
+    else:
+        logger.info("No new completed daily candles for %s (Total rows: %d).",
+                    HISTORY_FILE.name, len(merged))
     return merged
 
 
@@ -356,14 +360,20 @@ def run_pipeline() -> Tuple[pd.DataFrame, pd.DataFrame]:
     if filled_count > 0:
         logger.info("Updated realized variance for %d past forecast targets.", filled_count)
 
-    # Save latest_forecast.csv
-    df_forecasts = df_forecasts[forecast_cols]
-    df_forecasts.to_csv(FORECAST_FILE, index=False)
-    logger.info("Saved %s (Total rows: %d).", FORECAST_FILE.name, len(df_forecasts))
+    # Save latest_forecast.csv only if new forecasts were added, targets filled, or file missing
+    if new_rows or filled_count > 0 or not FORECAST_FILE.exists():
+        df_forecasts = df_forecasts[forecast_cols]
+        df_forecasts.to_csv(FORECAST_FILE, index=False)
+        logger.info("Saved %s (Total rows: %d).", FORECAST_FILE.name, len(df_forecasts))
+    else:
+        logger.info("No modifications to %s (Total rows: %d).", FORECAST_FILE.name, len(df_forecasts))
 
     # 6. Update live_scorecard.csv (evaluated on kind == 'live' rows where target has realized)
     scorecard_rows = []
     live_eval = df_forecasts[(df_forecasts["kind"] == "live") & df_forecasts["realized"].notna()].copy()
+
+    # Load existing scorecard if present to preserve timestamp on idempotent rerun
+    existing_sc = pd.read_csv(SCORECARD_FILE) if SCORECARD_FILE.exists() else pd.DataFrame()
 
     for h in [1, 10]:
         sub_h = live_eval[live_eval["horizon"] == h]
@@ -382,18 +392,32 @@ def run_pipeline() -> Tuple[pd.DataFrame, pd.DataFrame]:
             mse_hist_exp = np.nan
             mse_roll20 = np.nan
 
+        ts_to_use = now_utc_str
+        if not existing_sc.empty and "horizon" in existing_sc.columns:
+            prev_row = existing_sc[existing_sc["horizon"] == h]
+            if not prev_row.empty:
+                prev_n = prev_row["n_eval"].iloc[0]
+                prev_har = prev_row["mse_har"].iloc[0]
+                both_nan = pd.isna(prev_har) and pd.isna(mse_har)
+                both_close = (not pd.isna(prev_har)) and (not pd.isna(mse_har)) and (abs(prev_har - mse_har) < 1e-12)
+                if (prev_n == n_eval) and (both_nan or both_close) and "last_updated_utc" in prev_row.columns:
+                    ts_to_use = str(prev_row["last_updated_utc"].iloc[0])
+
         scorecard_rows.append({
             "horizon": h,
             "n_eval": n_eval,
             "mse_har": mse_har,
             "mse_hist_exp": mse_hist_exp,
             "mse_roll_20": mse_roll20,
-            "last_updated_utc": now_utc_str
+            "last_updated_utc": ts_to_use
         })
 
     df_scorecard = pd.DataFrame(scorecard_rows)
-    df_scorecard.to_csv(SCORECARD_FILE, index=False)
-    logger.info("Updated live scorecard at %s.", SCORECARD_FILE.name)
+    if new_rows or filled_count > 0 or not SCORECARD_FILE.exists():
+        df_scorecard.to_csv(SCORECARD_FILE, index=False)
+        logger.info("Updated live scorecard at %s.", SCORECARD_FILE.name)
+    else:
+        logger.info("No modifications to %s.", SCORECARD_FILE.name)
 
     return df_forecasts, df_scorecard
 

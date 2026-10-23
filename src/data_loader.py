@@ -52,7 +52,7 @@ def load_metrics_dm() -> pd.DataFrame:
     return df
 
 
-@st.cache_data
+@st.cache_data(ttl=3600)
 def load_latest_forecasts() -> pd.DataFrame:
     """Load live and backfilled daily HAR forecasts."""
     if not LATEST_FORECAST_FILE.exists():
@@ -63,7 +63,7 @@ def load_latest_forecasts() -> pd.DataFrame:
     return df
 
 
-@st.cache_data
+@st.cache_data(ttl=3600)
 def load_live_scorecard() -> pd.DataFrame:
     """Load live scorecard containing running MSE of HAR vs baselines."""
     if not LIVE_SCORECARD_FILE.exists():
@@ -71,7 +71,7 @@ def load_live_scorecard() -> pd.DataFrame:
     return pd.read_csv(LIVE_SCORECARD_FILE)
 
 
-@st.cache_data
+@st.cache_data(ttl=3600)
 def load_btcidr_history() -> pd.DataFrame:
     """Load full historical daily BTC/IDR prices and realized variances."""
     if not BTCIDR_HISTORY_FILE.exists():

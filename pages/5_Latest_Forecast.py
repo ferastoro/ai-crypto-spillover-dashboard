@@ -89,14 +89,28 @@ if df_fc.empty or df_hist.empty:
 
 # 1. Check Data Freshness & Stale Alert
 latest_as_of = df_fc["as_of_date"].max()
-now_utc = datetime.now(timezone.utc)
-days_stale = (now_utc.date() - latest_as_of.date()).days
+sub_latest = df_fc[df_fc["as_of_date"] == latest_as_of].copy()
+gen_time = str(sub_latest["generated_at_utc"].iloc[0]) if not sub_latest.empty else "N/A"
+last_candle_date = df_hist["Date"].max().strftime("%Y-%m-%d UTC")
 
-if days_stale > 3:
-    st.error(f"⚠️ **Stale Data Warning:** Latest completed candle is from `{latest_as_of.strftime('%Y-%m-%d')}` ({days_stale} days ago). The automated daily update may have encountered an API issue or pause.")
+col_info1, col_info2 = st.columns(2)
+with col_info1:
+    st.info(f"📅 **Last completed candle:** `{last_candle_date}`")
+with col_info2:
+    st.info(f"⏱️ **Forecast generated:** `{gen_time}`")
+
+# Stale Banner logic: compare as_of_date to yesterday's UTC date
+now_utc = datetime.now(timezone.utc)
+yesterday_utc = (now_utc - timedelta(days=1)).date()
+as_of_date = latest_as_of.date()
+days_behind = (yesterday_utc - as_of_date).days
+
+if days_behind > 3:
+    st.error(f"🚨 **Stale Data Error:** Latest forecast `as_of_date` is `{as_of_date}` ({days_behind} days behind yesterday's UTC date `{yesterday_utc}`). The automated daily update may have encountered an API issue or paused.")
+elif days_behind > 1:
+    st.warning(f"⚠️ **Stale Data Warning:** Latest forecast `as_of_date` is `{as_of_date}` ({days_behind} days behind yesterday's UTC date `{yesterday_utc}`). Daily forecast update is pending.")
 
 # 2. Extract Latest Forecast Cards (h=1 and h=10)
-sub_latest = df_fc[df_fc["as_of_date"] == latest_as_of].copy()
 fc_h1 = sub_latest[sub_latest["horizon"] == 1]
 fc_h10 = sub_latest[sub_latest["horizon"] == 10]
 
